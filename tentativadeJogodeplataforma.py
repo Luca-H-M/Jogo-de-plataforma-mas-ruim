@@ -13,7 +13,7 @@ display = pygame.Surface((1280, 960))                # tamanho "real" da tela
 gamescreen = 0                                       # vai controlar quando o personagem muda de tela (se eu chegar longe o suficiente)
 
 # estatisticas do jogador, tamanho, posição e velocidade
-playerposy = 100
+playerposy = 800
 playerheight = 30
 
 playerposx = 30
@@ -43,18 +43,18 @@ while running:
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
       if event.key == pygame.K_c and jumps != 0:                      # pulo
         speedy = -6
-        speedx *= 1.5
+        speedx *= 2
 
       if event.key == pygame.K_x and dash > 0:                      # direção de dashes
         teclas = pygame.key.get_pressed()   
         if teclas[pygame.K_LEFT] and teclas[pygame.K_RIGHT] == False:
-          speedx = -10
+          speedx = -6
         if teclas[pygame.K_UP] and teclas[pygame.K_DOWN] == False:
-          speedy = -10
+          speedy = -6
         if teclas[pygame.K_DOWN] and teclas[pygame.K_UP] == False:
-          speedy = 10
+          speedy = +6
         if teclas[pygame.K_RIGHT]and teclas[pygame.K_LEFT] == False:
-          speedx = 10
+          speedx = +6
         dash -= 1
 
   display.fill((146, 244, 255)) # Apaga o quadro atual preenchendo a tela com a cor azul claro
@@ -67,9 +67,9 @@ while running:
   
   if gamescreen == 0:                                   # tela atual do jogo, talvez seja usado talvez não 
     floor1height = 80
-    floor1width = 340                                   # informações das posições dos "blocos", vai ser alterado futuramente
+    floor1width = 3400                                   # informações das posições dos "blocos", vai ser alterado futuramente
     floor1posx = 0
-    floor1posy = 400
+    floor1posy = 880
   floor1 = pygame.Surface([floor1width, floor1height])
   floor1.fill((89, 51, 29))
   display.blit(floor1, (floor1posx, floor1posy))
@@ -85,7 +85,7 @@ while running:
 
   
   if speedx != 0:                         # delimita os padrões da velocidade no eixo x
-    speedx = speedx / airdrag
+    speedx -= speedx / airdrag
     if -0.1 < speedx < 0.1:
       speedx = 0
 
@@ -104,7 +104,7 @@ while running:
   if speedy == 0:               # percebe quando o jogador esta no chão, ele devolve o pulo e o timer do "pulo coyote
     coyote = 5
     jumps = 1
-    if dashtimer < -10:
+    if dashtimer < -2:
       dash = 1
   else:
     coyote -= 1
@@ -119,8 +119,8 @@ while running:
     dashtimer = 0
 
   if -15 < dashtimer < 0:
-    airdrag = 1.15              
-    gravity = 0
+    airdrag = 5              
+    gravity = 0.15
   elif -20 < dashtimer < -10 and speedy < -9:
     gravity = 4
     airdrag = 2
