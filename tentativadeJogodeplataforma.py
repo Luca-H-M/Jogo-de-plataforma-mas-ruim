@@ -15,9 +15,9 @@ gamescreen = 0                                       # vai controlar quando o pe
 # estatisticas do jogador, tamanho, posição e velocidade
 playerposy = 800
 playerheight = 30
-
 playerposx = 30
 playerwidth = 30
+
 speedy = 0
 speedx = 0
 xaccelspeed = 2
@@ -25,7 +25,7 @@ xaccelspeed = 2
 
 # estatisticas do jogo, gravidade, pulos, dashes, etc
 gravity = 0.2314
-airdrag = 2
+airdrag = 5
 
 jumps = 1
 coyote = 0
@@ -43,18 +43,19 @@ while running:
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
       if event.key == pygame.K_c and jumps != 0:                      # pulo
         speedy = -6
-        speedx *= 2
+        speedx *= 1.5
 
       if event.key == pygame.K_x and dash > 0:                      # direção de dashes
         teclas = pygame.key.get_pressed()   
         if teclas[pygame.K_LEFT] and teclas[pygame.K_RIGHT] == False:
-          speedx = -6
+          speedx -= 8
         if teclas[pygame.K_UP] and teclas[pygame.K_DOWN] == False:
-          speedy = -6
+          speedy -= 8
         if teclas[pygame.K_DOWN] and teclas[pygame.K_UP] == False:
-          speedy = +6
+          speedy = +16
         if teclas[pygame.K_RIGHT]and teclas[pygame.K_LEFT] == False:
-          speedx = +6
+          speedx += 8
+        
         dash -= 1
 
   display.fill((146, 244, 255)) # Apaga o quadro atual preenchendo a tela com a cor azul claro
@@ -85,14 +86,14 @@ while running:
 
   
   if speedx != 0:                         # delimita os padrões da velocidade no eixo x
-    speedx -= speedx / airdrag
+    speedx -= (speedx / airdrag) +  (speedx / abs(speedx))
     if -0.1 < speedx < 0.1:
       speedx = 0
 
   teclas = pygame.key.get_pressed()       # percebe quando uma tecla esta sendo segurada verificando movimento a direita, esquerda e o botão de pulo
-  if teclas[pygame.K_LEFT]:
+  if teclas[pygame.K_LEFT] and not 0 > dashtimer > -10:
     speedx -= xaccelspeed
-  if teclas[pygame.K_RIGHT]:
+  if teclas[pygame.K_RIGHT] and not 0 > dashtimer > -10:
     speedx += xaccelspeed
   if teclas[pygame.K_c]:
     gravity = 0.1314
@@ -118,18 +119,18 @@ while running:
   else:
     dashtimer = 0
 
-  if -15 < dashtimer < 0:
-    airdrag = 5              
+  if -5 < dashtimer < 0:
+    airdrag = -3
     gravity = 0.15
-  elif -20 < dashtimer < -10 and speedy < -9:
+  elif -15 < dashtimer < -10 and speedy < -9:
     gravity = 4
-    airdrag = 2
+    airdrag = -3
   else:
-    airdrag = 2
+    airdrag = 5
 
 
 
-  surface_texto = font.render(f'speedx{speedx} playeposy{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
+  surface_texto = font.render(f'dashtimer{dashtimer} speedx{speedx} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
 
