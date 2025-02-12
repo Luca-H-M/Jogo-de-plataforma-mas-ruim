@@ -1,16 +1,35 @@
 import pygame
 
-pygame.init()
+class BlockSprite(pygame.sprite.Sprite):
+  def __init__(self):
+    pygame.sprite.Sprite.__init__(self)
+    img = pygame.image.load('Block-standing.png').convert_alpha()
+    self.img_1 = pygame.transform.scale(img, (33, 33))
+    self.image = self.img_1
+    self.rect = self.image.get_rect()
+    self.rect.topleft = (250, 250)
 
-WINDOW_SIZE = (1066, 800)                            # tamanho da janela
-screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
-clock = pygame.time.Clock()
-running = True
-font = pygame.font.Font(None, 24)                    # fonte qualquer
+    self.velocidadex = 2
+    self.velocidadey = 0
+    self.gravity = 0.2
+  
+  def player_esquerda(self, x):
+    self.rect.x -= self.velocidadex + x
 
-display = pygame.Surface((1280, 960))                # tamanho "real" da tela
+  def player_direita(self, x):
+    self.rect.x += self.velocidadex + x
 
-gamescreen = 0                                       # vai controlar quando o personagem muda de tela (se eu chegar longe o suficiente)
+  def update(self):
+    if self.velocidadey < 10:
+      self.velocidadey += self.gravity
+    elif self.rect.y > 960:
+      self.velocidadey *= -1
+    else:
+      self.velocidadey = 10
+    self.rect.y += self.velocidadey
+
+
+
 
 # estatisticas do jogador, tamanho, posição e velocidade
 playerposy = 800
@@ -33,6 +52,22 @@ dash = 1
 dashtimer = 0
 
 wait = 0   # variavel "branca"
+
+### jogo ###
+pygame.init()
+
+WINDOW_SIZE = (1066, 800)                            # tamanho da janela
+screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
+clock = pygame.time.Clock()
+
+bloco = BlockSprite()
+
+todos_sprites = pygame.sprite.Group([bloco])
+
+running = True
+font = pygame.font.Font(None, 24)                    # fonte qualquer
+display = pygame.Surface((1280, 960))                # tamanho "real" da tela
+gamescreen = 0                                       # vai controlar quando o personagem muda de tela (se eu chegar longe o suficiente)
 
 while running:
   # Processamento de eventos (entradas de teclado e mouse)
@@ -93,8 +128,10 @@ while running:
   teclas = pygame.key.get_pressed()       # percebe quando uma tecla esta sendo segurada verificando movimento a direita, esquerda e o botão de pulo
   if teclas[pygame.K_LEFT] and not 0 > dashtimer > -10:
     speedx -= xaccelspeed
+    bloco.player_esquerda(1)
   if teclas[pygame.K_RIGHT] and not 0 > dashtimer > -10:
     speedx += xaccelspeed
+    bloco.player_direita(1)
   if teclas[pygame.K_c]:
     gravity = 0.1314
   else:
@@ -133,6 +170,8 @@ while running:
   surface_texto = font.render(f'dashtimer{dashtimer} speedx{speedx} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
+  todos_sprites.update()
+  todos_sprites.draw(display)
 
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
   screen.blit(scale, (0, 0))
