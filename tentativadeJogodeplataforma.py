@@ -4,7 +4,7 @@ class BlockSprite(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
     img = pygame.image.load('Block-standing.png').convert_alpha()
-    self.img_1 = pygame.transform.scale(img, (33, 33))
+    self.img_1 = pygame.transform.scale(img, (30, 30))
     self.image = self.img_1
     self.rect = self.image.get_rect()
     self.rect.topleft = (250, 250)
@@ -22,11 +22,21 @@ class BlockSprite(pygame.sprite.Sprite):
   def update(self):
     if self.velocidadey < 10:
       self.velocidadey += self.gravity
-    elif self.rect.y > 960:
-      self.velocidadey *= -1
     else:
       self.velocidadey = 10
+    if self.rect.y > 930:
+      self.velocidadey *= -1
     self.rect.y += self.velocidadey
+
+
+class FloorSprite(pygame.sprite.Sprite):
+  def __init__(self):
+    pygame.sprite.Sprite.__init__(self)
+    img = pygame.image.load('Dirt-grass.png').convert_alpha()
+    self.img1 = pygame.transform.scale(img, (30, 30))
+    self.image = self.img1
+    self.rect = self.image.get_rect()
+    self.rect.topleft = (250, 840)
 
 
 
@@ -61,8 +71,9 @@ screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
 clock = pygame.time.Clock()
 
 bloco = BlockSprite()
+chão = FloorSprite()
 
-todos_sprites = pygame.sprite.Group([bloco])
+todos_sprites = pygame.sprite.Group([bloco, chão])
 
 running = True
 font = pygame.font.Font(None, 24)                    # fonte qualquer
