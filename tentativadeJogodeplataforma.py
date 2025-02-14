@@ -19,7 +19,7 @@ class BlockSprite(pygame.sprite.Sprite):
   def player_direita(self, x):
     self.rect.x += self.velocidadex + x
 
-  def update(self):
+  def gravity_update(self):
     if self.velocidadey < 10:
       self.velocidadey += self.gravity
     else:
@@ -27,6 +27,7 @@ class BlockSprite(pygame.sprite.Sprite):
     if self.rect.y > 930:
       self.velocidadey *= -1
     self.rect.y += self.velocidadey
+    print(self.rect.y)
 
 
 class FloorSprite(pygame.sprite.Sprite):
@@ -34,9 +35,14 @@ class FloorSprite(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     img = pygame.image.load('Dirt-grass.png').convert_alpha()
     self.img1 = pygame.transform.scale(img, (30, 30))
+    img = pygame.image.load('Dirt-1.png').convert_alpha()
+    self.img2 = pygame.transform.scale(img, (30, 30))
     self.image = self.img1
     self.rect = self.image.get_rect()
-    self.rect.topleft = (250, 840)
+    self.rect.topleft = (250, 820)
+
+  def change(self):
+    self.image = self.img2
 
 
 
@@ -181,7 +187,12 @@ while running:
   surface_texto = font.render(f'dashtimer{dashtimer} speedx{speedx} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
-  todos_sprites.update()
+  if bloco.rect.colliderect(chão):
+    chão.change()
+    bloco.rect.bottom = chão.rect.top +0.5
+    bloco.velocidadey = 0
+  else:
+    bloco.gravity_update()
   todos_sprites.draw(display)
 
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
