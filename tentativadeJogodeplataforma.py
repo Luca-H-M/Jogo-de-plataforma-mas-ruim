@@ -13,30 +13,35 @@ def CHUNKS(x):
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
-              ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
-              ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"]]
+              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
+              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
   chão = []
   y = 0
   for row in tabela:
     x = 0
     for tile in row:
       if tile == "1":
-        chão.append(FloorSprite(x * 45 * 2, y * 45 * 2))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45))
-        chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45))
+        chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 1))
+        chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
+        chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
+        chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 1))
+      elif tile == "2":
+        chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 2))
+        chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
+        chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
+        chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 2))
       x += 1
     y += 1
   return chão
 
 class BlockSprite(pygame.sprite.Sprite):
-  def __init__(self):
+  def __init__(self, x, y):
     pygame.sprite.Sprite.__init__(self)
     img = pygame.image.load('Block-standing.png').convert_alpha()
-    self.img_1 = pygame.transform.scale(img, (45, 45))
-    self.image = self.img_1
+    self.img1 = pygame.transform.scale(img, (45, 45))
+    self.image = self.img1
     self.rect = self.image.get_rect()
-    self.rect.topleft = (250, 250)
+    self.rect.topleft = (x, y)
 
     self.velocidadex = 2
     self.velocidadey = 0
@@ -59,13 +64,16 @@ class BlockSprite(pygame.sprite.Sprite):
 
 
 class FloorSprite(pygame.sprite.Sprite):
-  def __init__(self, x, y):
+  def __init__(self, x, y, z):
     pygame.sprite.Sprite.__init__(self)
     img = pygame.image.load('Dirt-grass.png').convert_alpha()
     self.img1 = pygame.transform.scale(img, (45, 45))
     img = pygame.image.load('Dirt-1.png').convert_alpha()
     self.img2 = pygame.transform.scale(img, (45, 45))
-    self.image = self.img1
+    if z == 1:
+      self.image = self.img1
+    elif z == 2:
+      self.image = self.img2
     self.rect = self.image.get_rect()
     self.rect.topleft = (x, y)
 
@@ -104,13 +112,15 @@ WINDOW_SIZE = (1066, 800)                            # tamanho da janela
 screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
 clock = pygame.time.Clock()
 
-bloco = BlockSprite()
+bloco = BlockSprite(250, 250)
 chão = CHUNKS(1)
 
-gameMap = CHUNKS(1)
+gameMap = FloorSprite((1*2) * 45, (9*2) * 45, 1)
 
-todos_sprites = pygame.sprite.Group([bloco, chão])
+todos_sprites = pygame.sprite.Group([bloco])
+todos_sprites.add(chão)
 
+groupchão = pygame.sprite.Group([chão])
 running = True
 font = pygame.font.Font(None, 24)                    # fonte qualquer
 display = pygame.Surface((1280, 960))                # tamanho "real" da tela
@@ -217,10 +227,17 @@ while running:
   surface_texto = font.render(f'dashtimer{dashtimer} speedx{speedx} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
+  hit_list = pygame.sprite.spritecollide(bloco, groupchão, True)
+  if hit_list != []:
+    todos_sprites.add(hit_list)
+    groupchão.add(hit_list)
+    bloco.velocidadey = -6
+
+
   #if bloco.rect.colliderect(chão):
-  #  chão.change()
-  #  bloco.rect.bottom = chão.rect.top +0.5
-  #  bloco.velocidadey = 0
+    #chão.change()
+    #bloco.rect.bottom = chão.rect.top +0.5
+    #bloco.velocidadey = 0
   #else:
   bloco.gravity_update()
   todos_sprites.draw(display)
