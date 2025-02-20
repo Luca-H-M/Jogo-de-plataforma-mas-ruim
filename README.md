@@ -1,2 +1,2 @@
-# Celeste-but-bad
-Jogo de plataforma com movimentos parecidos com celeste
+# Jogo-de-plataforma-mas-ruim
+Jogo de plataforma com pulos duplos e "obstaculos"
