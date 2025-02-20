@@ -9,7 +9,7 @@ def CHUNKS(x):
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
               ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
@@ -46,6 +46,10 @@ class BlockSprite(pygame.sprite.Sprite):
     self.velocidadex = 2
     self.velocidadey = 0
     self.gravity = 0.2
+    self.jumps = 0
+    self.jump = 10
+
+
   
   def player_esquerda(self, x):
     self.rect.x -= self.velocidadex + x
@@ -53,15 +57,48 @@ class BlockSprite(pygame.sprite.Sprite):
   def player_direita(self, x):
     self.rect.x += self.velocidadex + x
 
-  def gravity_update(self):
-    if self.velocidadey < 10:
-      self.velocidadey += self.gravity
-    else:
+  def player_jump(self):
+    if self.jumps > 0:
+      self.velocidadey = -10
+      self.jumps -= 1
+
+  def update(self, chunks):
+    self.velocidadey += self.gravity
+    if self.velocidadey > 10:
       self.velocidadey = 10
     if self.rect.y > 930:
       self.velocidadey *= -1
-    self.rect.y += self.velocidadey
 
+    
+    if chunks == 1:
+      tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+              ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
+              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
+              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
+    y = 0
+    for row in tabela:
+      x = 0
+      for tile in row:
+        if tile == "1":
+          if ((y*2) * 45) + 35 < bloco.rect.top < ((y*2) * 45) + 90 and ((x*2) * 45) -34 < bloco.rect.x < ((x*2) * 45) + 75:
+            bloco.rect.top = ((y*2) * 45) + 90
+          if ((y*2) * 45) <= bloco.rect.bottom < ((y*2) * 45) + 15 and ((x*2) * 45) -44 < bloco.rect.x < ((x*2) * 45) + 90:
+            self.jumps = 1
+            self.rect.bottom = ((y*2) * 45) - 10
+          if ((y*2) * 45) - 35 <= bloco.rect.y < ((y*2) * 45) + 90 and ((x*2) * 45) + 80 < bloco.rect.left < ((x*2) * 45) + 90:
+            bloco.rect.left = ((x*2) * 45) + 90
+          if ((y*2) * 45) - 35 <= bloco.rect.y < ((y*2) * 45) + 90 and ((x*2) * 45) < bloco.rect.right < ((x*2) * 45) + 10:
+            bloco.rect.right = ((x*2) * 45)
+        x += 1
+      y += 1
+    self.rect.y += self.velocidadey
 
 class FloorSprite(pygame.sprite.Sprite):
   def __init__(self, x, y, z):
@@ -125,6 +162,7 @@ running = True
 font = pygame.font.Font(None, 24)                    # fonte qualquer
 display = pygame.Surface((1280, 960))                # tamanho "real" da tela
 
+collisionupdate = 0
 
 while running:
   # Processamento de eventos (entradas de teclado e mouse)
@@ -133,9 +171,10 @@ while running:
       running = False
     
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
-      if event.key == pygame.K_c and jumps != 0:                      # pulo
+      if event.key == pygame.K_c:                      # pulo
         speedy = -6
         speedx *= 1.5
+        bloco.player_jump()
 
       if event.key == pygame.K_x and dash > 0:                      # direção de dashes
         teclas = pygame.key.get_pressed()   
@@ -196,16 +235,7 @@ while running:
   playerposx += speedx
 
 
-  if speedy == 0:               # percebe quando o jogador esta no chão, ele devolve o pulo e o timer do "pulo coyote
-    coyote = 5
-    jumps = 1
-    if dashtimer < -2:
-      dash = 1
-  else:
-    coyote -= 1
-  if coyote < 0:
-    jumps = 0
-    coyote = -1
+
 
 
   if dash == 0:                 # delimita a fisica do dash, talvez tenham alguns ajustes
@@ -224,24 +254,15 @@ while running:
 
 
 
-  surface_texto = font.render(f'dashtimer{dashtimer} speedx{speedx} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
+  surface_texto = font.render(f'dashtimer{dashtimer} clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
-  hit_list = pygame.sprite.spritecollide(bloco, groupchão, True)
-  if hit_list != []:
-    todos_sprites.add(hit_list)
-    groupchão.add(hit_list)
-    bloco.velocidadey = -6
 
 
-  #if bloco.rect.colliderect(chão):
-    #chão.change()
-    #bloco.rect.bottom = chão.rect.top +0.5
-    #bloco.velocidadey = 0
-  #else:
-  bloco.gravity_update()
+  ### precisa pra funcionar/ coisas novas ###
+
+  bloco.update(1)
   todos_sprites.draw(display)
-
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
   screen.blit(scale, (0, 0))
   
