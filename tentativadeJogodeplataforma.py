@@ -87,8 +87,9 @@ class BlockSprite(pygame.sprite.Sprite):
       x = 0
       for tile in row:
         if tile == "1":
-          if ((y*2) * 45) + 35 < bloco.rect.top < ((y*2) * 45) + 90 and ((x*2) * 45) -34 < bloco.rect.x < ((x*2) * 45) + 75:
+          if ((y*2) * 45) + 35 < bloco.rect.top < ((y*2) * 45) + 90 and ((x*2) * 45) -40 < bloco.rect.x < ((x*2) * 45) + 85:
             bloco.rect.top = ((y*2) * 45) + 90
+            self.velocidadey = 0
           if ((y*2) * 45) <= bloco.rect.bottom < ((y*2) * 45) + 15 and ((x*2) * 45) -44 < bloco.rect.x < ((x*2) * 45) + 90:
             self.jumps = 1
             self.rect.bottom = ((y*2) * 45) - 10
@@ -117,29 +118,6 @@ class FloorSprite(pygame.sprite.Sprite):
   def change(self):
     self.image = self.img2
 
-
-
-
-# estatisticas do jogador, tamanho, posição e velocidade
-playerposy = 800
-playerheight = 30
-playerposx = 30
-playerwidth = 30
-
-speedy = 0
-speedx = 0
-xaccelspeed = 2
-
-
-# estatisticas do jogo, gravidade, pulos, dashes, etc
-gravity = 0.2314
-airdrag = 5
-
-jumps = 1
-coyote = 0
-dash = 1
-dashtimer = 0
-
 wait = 0   # variavel "branca"
 
 ### jogo ###
@@ -152,17 +130,12 @@ clock = pygame.time.Clock()
 bloco = BlockSprite(250, 250)
 chão = CHUNKS(1)
 
-gameMap = FloorSprite((1*2) * 45, (9*2) * 45, 1)
-
 todos_sprites = pygame.sprite.Group([bloco])
 todos_sprites.add(chão)
 
-groupchão = pygame.sprite.Group([chão])
 running = True
 font = pygame.font.Font(None, 24)                    # fonte qualquer
 display = pygame.Surface((1280, 960))                # tamanho "real" da tela
-
-collisionupdate = 0
 
 while running:
   # Processamento de eventos (entradas de teclado e mouse)
@@ -172,87 +145,19 @@ while running:
     
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
       if event.key == pygame.K_c:                      # pulo
-        speedy = -6
-        speedx *= 1.5
         bloco.player_jump()
-
-      if event.key == pygame.K_x and dash > 0:                      # direção de dashes
-        teclas = pygame.key.get_pressed()   
-        if teclas[pygame.K_LEFT] and teclas[pygame.K_RIGHT] == False:
-          speedx -= 8
-        if teclas[pygame.K_UP] and teclas[pygame.K_DOWN] == False:
-          speedy -= 8
-        if teclas[pygame.K_DOWN] and teclas[pygame.K_UP] == False:
-          speedy = +16
-        if teclas[pygame.K_RIGHT]and teclas[pygame.K_LEFT] == False:
-          speedx += 8
-        
-        dash -= 1
 
   display.fill((146, 244, 255)) # Apaga o quadro atual preenchendo a tela com a cor azul claro
 
-
-  player = pygame.Surface([playerwidth, playerheight])  # cria o jogador, talvez seja substituido por um sprite
-  player.fill((0, 0, 0))
-  display.blit(player, (playerposx, playerposy))
-
-  
-  if wait == 0:                                   # tela atual do jogo, talvez seja usado talvez não 
-    floor1height = 80
-    floor1width = 3400                                   # informações das posições dos "blocos", vai ser alterado futuramente
-    floor1posx = 0
-    floor1posy = 880
-  floor1 = pygame.Surface([floor1width, floor1height])
-  floor1.fill((89, 51, 29))
-  display.blit(floor1, (floor1posx, floor1posy))
-
-
-  speedy = speedy + gravity                             # delimita os padrões da velocidade no eixo y
-  if speedy > 10:
-    speedy = 10
-  playerposy += speedy
-  if floor1posy + 15 > playerposy + 30 > floor1posy and floor1posx - 30 < playerposx < floor1posx + floor1width: # faz o jogador não atravessar o chão, vai ser alterado
-    playerposy = floor1posy - 30
-    speedy = 0
-
-  
-  if speedx != 0:                         # delimita os padrões da velocidade no eixo x
-    speedx -= (speedx / airdrag) +  (speedx / abs(speedx))
-    if -0.1 < speedx < 0.1:
-      speedx = 0
-
   teclas = pygame.key.get_pressed()       # percebe quando uma tecla esta sendo segurada verificando movimento a direita, esquerda e o botão de pulo
-  if teclas[pygame.K_LEFT] and not 0 > dashtimer > -10:
-    speedx -= xaccelspeed
+  if teclas[pygame.K_LEFT]:
     bloco.player_esquerda(1)
-  if teclas[pygame.K_RIGHT] and not 0 > dashtimer > -10:
-    speedx += xaccelspeed
+  if teclas[pygame.K_RIGHT]:
     bloco.player_direita(1)
   if teclas[pygame.K_c]:
-    gravity = 0.1314
+    bloco.gravity = 0.05
   else:
-    gravity = 0.2314
-  playerposx += speedx
-
-
-
-
-
-  if dash == 0:                 # delimita a fisica do dash, talvez tenham alguns ajustes
-    dashtimer -= 1
-  else:
-    dashtimer = 0
-
-  if -5 < dashtimer < 0:
-    airdrag = -3
-    gravity = 0.15
-  elif -15 < dashtimer < -10 and speedy < -9:
-    gravity = 4
-    airdrag = -3
-  else:
-    airdrag = 5
-
-
+    bloco.gravity = 0.2
 
   surface_texto = font.render(f'dashtimer{dashtimer} clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
