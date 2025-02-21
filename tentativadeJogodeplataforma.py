@@ -1,38 +1,43 @@
 import pygame
 
-def CHUNKS(x):
-  if x == 0:
-    pass
-  elif x == 1:
-    tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
-              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
-              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
-  chão = []
-  y = 0
-  for row in tabela:
-    x = 0
-    for tile in row:
-      if tile == "1":
-        chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 1))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
-        chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 1))
-      elif tile == "2":
-        chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 2))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
-        chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
-        chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 2))
-      x += 1
-    y += 1
-  return chão
+class Chunks(pygame.sprite.Sprite):
+    def __init__(self):
+      pygame.sprite.Sprite.__init__(self)
+      self.tabela = []
+
+    def tela(self, x):
+      if x == 0:
+        pass
+      elif x == 1:
+        self.tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
+                  ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
+                  ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
+      chão = []
+      y = 0
+      for row in self.tabela:
+        x = 0
+        for tile in row:
+          if tile == "1":
+            chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 1))
+            chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
+            chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
+            chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 1))
+          elif tile == "2":
+            chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 2))
+            chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
+            chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
+            chão.append(FloorSprite((x*2 + 1) * 45, (y*2) * 45, 2))
+          x += 1
+        y += 1
+      return chão
 
 class BlockSprite(pygame.sprite.Sprite):
   def __init__(self, x, y):
@@ -59,7 +64,7 @@ class BlockSprite(pygame.sprite.Sprite):
 
   def player_jump(self):
     if self.jumps > 0:
-      self.velocidadey = -10
+      self.velocidadey = -6
       self.jumps -= 1
 
   def update(self, chunks):
@@ -69,21 +74,8 @@ class BlockSprite(pygame.sprite.Sprite):
     if self.rect.y > 930:
       self.velocidadey *= -1
 
-    
-    if chunks == 1:
-      tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-              ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
-              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
-              ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
     y = 0
-    for row in tabela:
+    for row in CHUNKS.tabela:
       x = 0
       for tile in row:
         if tile == "1":
@@ -118,6 +110,7 @@ class FloorSprite(pygame.sprite.Sprite):
   def change(self):
     self.image = self.img2
 
+
 wait = 0   # variavel "branca"
 
 ### jogo ###
@@ -128,7 +121,8 @@ screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
 clock = pygame.time.Clock()
 
 bloco = BlockSprite(250, 250)
-chão = CHUNKS(1)
+CHUNKS = Chunks()
+chão = CHUNKS.tela(1)
 
 todos_sprites = pygame.sprite.Group([bloco])
 todos_sprites.add(chão)
@@ -155,11 +149,11 @@ while running:
   if teclas[pygame.K_RIGHT]:
     bloco.player_direita(1)
   if teclas[pygame.K_c]:
-    bloco.gravity = 0.05
+    bloco.gravity = 0.1
   else:
     bloco.gravity = 0.2
 
-  surface_texto = font.render(f'dashtimer{dashtimer} clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
+  surface_texto = font.render(f' clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
 
