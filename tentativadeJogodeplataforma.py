@@ -10,16 +10,16 @@ class Chunks(pygame.sprite.Sprite):
         pass
       elif x == 1:
         self.tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["1","1","1","0","0","0","1","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
-                  ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"],
-                  ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"],
-                  ["2","2","2","2","2","2","2","2","2","2","2","2","2","2","2"]]
+                  ["0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","2","1","1","1","1","1","0","0"],
+                  ["0","0","0","0","0","0","0","2","0","0","0","0","0","0","0"],
+                  ["1","1","1","0","0","1","0","2","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","2","0","2","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","2","0","0","0","0","0","0","0","0","0"],
+                  ["1","1","0","0","0","2","0","1","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","2","0","2","0","0","0","0","0","0","0"],
+                  ["1","1","1","1","1","2","1","2","0","0","0","1","1","1","1"],
+                  ["2","2","2","2","2","2","2","2","0","0","0","2","2","2","2"]]
       chão = []
       y = 0
       for row in self.tabela:
@@ -53,7 +53,7 @@ class BlockSprite(pygame.sprite.Sprite):
     self.gravity = 0.2
     self.jumps = 0
     self.jump = 10
-
+    self.zjump = 0
 
   
   def player_esquerda(self, x):
@@ -66,32 +66,38 @@ class BlockSprite(pygame.sprite.Sprite):
     if self.jumps > 0:
       self.velocidadey = -6
       self.jumps -= 1
+      self.zjump = 6
 
-  def update(self, chunks):
+  def update(self):
     self.velocidadey += self.gravity
     if self.velocidadey > 10:
       self.velocidadey = 10
-    if self.rect.y > 930:
-      self.velocidadey *= -1
-
+    self.rect.y += self.velocidadey
+    self.zjump += 1
+    if self.zjump == 5:
+      self.jumps -= 1
     y = 0
     for row in CHUNKS.tabela:
       x = 0
       for tile in row:
-        if tile == "1":
+        if tile == "0":
+          pass
+        else:
           if ((y*2) * 45) + 35 < bloco.rect.top < ((y*2) * 45) + 90 and ((x*2) * 45) -40 < bloco.rect.x < ((x*2) * 45) + 85:
             bloco.rect.top = ((y*2) * 45) + 90
             self.velocidadey = 0
           if ((y*2) * 45) <= bloco.rect.bottom < ((y*2) * 45) + 15 and ((x*2) * 45) -44 < bloco.rect.x < ((x*2) * 45) + 90:
-            self.jumps = 1
-            self.rect.bottom = ((y*2) * 45) - 10
+            self.jumps = 2
+            self.rect.bottom = ((y*2) * 45)
+            if self.velocidadey > 0:
+              self.velocidadey = 0
+            self.zjump = 0
           if ((y*2) * 45) - 35 <= bloco.rect.y < ((y*2) * 45) + 90 and ((x*2) * 45) + 80 < bloco.rect.left < ((x*2) * 45) + 90:
             bloco.rect.left = ((x*2) * 45) + 90
           if ((y*2) * 45) - 35 <= bloco.rect.y < ((y*2) * 45) + 90 and ((x*2) * 45) < bloco.rect.right < ((x*2) * 45) + 10:
             bloco.rect.right = ((x*2) * 45)
         x += 1
       y += 1
-    self.rect.y += self.velocidadey
 
 class FloorSprite(pygame.sprite.Sprite):
   def __init__(self, x, y, z):
@@ -160,7 +166,7 @@ while running:
 
   ### precisa pra funcionar/ coisas novas ###
 
-  bloco.update(1)
+  bloco.update()
   todos_sprites.draw(display)
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
   screen.blit(scale, (0, 0))
