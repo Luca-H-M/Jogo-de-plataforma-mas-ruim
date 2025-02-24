@@ -10,7 +10,7 @@ class Chunks(pygame.sprite.Sprite):
       self.rect.topleft = (0, 0)
 
       self.tabela = []
-      self.x = 0
+      self.x = 1
 
     def tela(self):
       if self.x == 0:
@@ -171,10 +171,12 @@ while running:
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
       if event.key == pygame.K_ESCAPE:
         if tabela.x == 0:
-          tabela.x = 1
+          running = False
         else:
           tabela.x = 0
-      elif event.key == pygame.K_RIGHT:
+          chão = tabela.tela()
+          todos_sprites = pygame.sprite.Group([chão])
+      elif event.key == pygame.K_a:
         if tabela.x == 0:
           tabela.x == 1
           todos_sprites.remove(chão)
