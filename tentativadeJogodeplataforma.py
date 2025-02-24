@@ -3,12 +3,19 @@ import pygame
 class Chunks(pygame.sprite.Sprite):
     def __init__(self):
       pygame.sprite.Sprite.__init__(self)
-      self.tabela = []
+      img = pygame.image.load('Menu.png').convert_alpha()
+      self.img1 = pygame.transform.scale(img, (1280, 980))
+      self.image = self.img1
+      self.rect = self.image.get_rect()
+      self.rect.topleft = (0, 0)
 
-    def tela(self, x):
-      if x == 0:
-        pass
-      elif x == 1:
+      self.tabela = []
+      self.x = 0
+
+    def tela(self):
+      if self.x == 0:
+        self.tabela = [["-1"]]
+      elif self.x == 1:
         self.tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
                   ["0","0","0","0","0","0","0","1","0","0","0","0","0","0","0"],
                   ["0","0","0","0","0","0","0","2","1","1","1","1","1","0","0"],
@@ -20,12 +27,26 @@ class Chunks(pygame.sprite.Sprite):
                   ["0","0","0","0","0","2","0","2","0","0","0","0","0","0","0"],
                   ["1","1","1","1","1","2","1","2","0","0","0","1","1","1","1"],
                   ["2","2","2","2","2","2","2","2","0","0","0","2","2","2","2"]]
+      elif self.x == 2:
+        self.tabela = [["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+                  ["1","1","1","1","1","1","1","1","0","0","0","1","1","1","1"],
+                  ["2","2","2","2","2","2","2","2","0","0","0","2","2","2","2"]]
       chão = []
       y = 0
       for row in self.tabela:
         x = 0
         for tile in row:
-          if tile == "1":
+          if tile == "-1":
+            chão.append(Chunks())
+          elif tile == "1":
             chão.append(FloorSprite((x*2) * 45, (y*2) * 45, 1))
             chão.append(FloorSprite((x*2 + 1) * 45, (y*2 + 1) * 45, 2))
             chão.append(FloorSprite((x*2) * 45, (y*2 + 1) * 45, 2))
@@ -68,6 +89,10 @@ class BlockSprite(pygame.sprite.Sprite):
       self.jumps -= 1
       self.zjump = 6
 
+  def respawn(self):
+    if tabela.x == 1:
+      bloco.rect.topleft = (10, 850)
+
   def update(self):
     self.velocidadey += self.gravity
     if self.velocidadey > 10:
@@ -77,7 +102,7 @@ class BlockSprite(pygame.sprite.Sprite):
     if self.zjump == 5:
       self.jumps -= 1
     y = 0
-    for row in CHUNKS.tabela:
+    for row in tabela.tabela:
       x = 0
       for tile in row:
         if tile == "0":
@@ -127,8 +152,9 @@ screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
 clock = pygame.time.Clock()
 
 bloco = BlockSprite(250, 250)
-CHUNKS = Chunks()
-chão = CHUNKS.tela(1)
+tabela = Chunks()
+
+chão = tabela.tela()
 
 todos_sprites = pygame.sprite.Group([bloco])
 todos_sprites.add(chão)
@@ -142,12 +168,29 @@ while running:
   for event in pygame.event.get():
     if event.type == pygame.QUIT:                                     #pra quando quiserem sair do jogo
       running = False
-    
     elif event.type == pygame.KEYDOWN:                                # verifica se uma tecla foi pressionada
-      if event.key == pygame.K_c:                      # pulo
+      if event.key == pygame.K_ESCAPE:
+        if tabela.x == 0:
+          tabela.x = 1
+        else:
+          tabela.x = 0
+      elif event.key == pygame.K_RIGHT:
+        if tabela.x == 0:
+          tabela.x == 1
+          todos_sprites.remove(chão)
+          chão = tabela.tela()
+          todos_sprites.add(chão)
+          todos_sprites.add(bloco)
+          bloco.respawn()
+      
+      elif event.key == pygame.K_c:                      # pulo
         bloco.player_jump()
 
   display.fill((146, 244, 255)) # Apaga o quadro atual preenchendo a tela com a cor azul claro
+
+  if tabela.x == 0:
+    todos_sprites = pygame.sprite.Group([chão])
+  
 
   teclas = pygame.key.get_pressed()       # percebe quando uma tecla esta sendo segurada verificando movimento a direita, esquerda e o botão de pulo
   if teclas[pygame.K_LEFT]:
@@ -155,17 +198,23 @@ while running:
   if teclas[pygame.K_RIGHT]:
     bloco.player_direita(1)
   if teclas[pygame.K_c]:
-    bloco.gravity = 0.1
+    bloco.gravity = 0.15
   else:
     bloco.gravity = 0.2
 
   surface_texto = font.render(f' clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
 
+  if bloco.rect.right >= 1280:
+    todos_sprites.remove(chão)
+    tabela.x += 1
+    chão = tabela.tela()
+    todos_sprites.add(chão)
+    bloco.rect.x = 0
 
 
   ### precisa pra funcionar/ coisas novas ###
-
+  print(tabela.x)
   bloco.update()
   todos_sprites.draw(display)
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
