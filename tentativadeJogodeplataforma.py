@@ -89,9 +89,9 @@ class BlockSprite(pygame.sprite.Sprite):
       self.jumps -= 1
       self.zjump = 6
 
-  def respawn(self, y):
+  def respawn(self, x, y):
     if tabela.x != 0:
-      bloco.rect.topleft = (10, y)
+      bloco.rect.topleft = (x, y)
 
   def update(self):
     self.velocidadey += self.gravity
@@ -151,6 +151,8 @@ WINDOW_SIZE = (1066, 800)                            # tamanho da janela
 screen = pygame.display.set_mode(WINDOW_SIZE, 9, 32) # configura janela do jogo
 clock = pygame.time.Clock()
 
+spawny = 750
+
 bloco = BlockSprite(250, 250)
 tabela = Chunks()
 
@@ -160,8 +162,10 @@ todos_sprites = pygame.sprite.Group([bloco])
 todos_sprites.add(chão)
 
 running = True
-font = pygame.font.Font(None, 24)                    # fonte qualquer
+font = pygame.font.Font(None, 30)                    # fonte qualquer
 display = pygame.Surface((1280, 960))                # tamanho "real" da tela
+
+timer = 0
 
 while running:
   # Processamento de eventos (entradas de teclado e mouse)
@@ -183,7 +187,10 @@ while running:
           chão = tabela.tela()
           todos_sprites.add(chão)
           todos_sprites.add(bloco)
-          bloco.respawn(750)
+          spawny = 760
+          spawnx = 10
+          bloco.respawn(spawnx, spawny)
+          timer = 0
       
         elif event.key == pygame.K_c:                      # pulo
           bloco.player_jump()
@@ -204,19 +211,35 @@ while running:
   else:
     bloco.gravity = 0.2
 
-  surface_texto = font.render(f' clock{clock} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
+
+  timer += 1
+
+  surface_texto = font.render(f' {clock} tempo:{timer/60:.2f} ', True, 'black')  #texto para me ajudar a entender o que esta dando de errado quando as coisas dão errado
   display.blit(surface_texto, (0, 0))
+
+
 
   if bloco.rect.right >= 1280:
     todos_sprites.remove(chão)
     tabela.x += 1
     chão = tabela.tela()
     todos_sprites.add(chão)
-    bloco.rect.x = 0
+    spawny = bloco.rect.top
+    spawnx = 10
+    bloco.respawn(spawnx, spawny)
 
-  if bloco.rect.top >= 980:
-    bloco.respawn(750)
+  if bloco.rect.top >= 980 and tabela.x > 0:
+    bloco.respawn(spawnx, spawny)
 
+  if bloco.rect.right <= 0:
+    if tabela.x > 1:
+      tabela.x -= 1
+      chão = tabela.tela()
+      todos_sprites.remove(chão)
+      todos_sprites.add(chão)
+      spawny = bloco.rect.top
+      spawnx = 1230
+      bloco.respawn(spawnx, spawny)
 
   ### precisa pra funcionar/ coisas novas ###
   bloco.update()
