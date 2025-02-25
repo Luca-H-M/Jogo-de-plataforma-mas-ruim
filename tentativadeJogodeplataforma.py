@@ -10,7 +10,7 @@ class Chunks(pygame.sprite.Sprite):
       self.rect.topleft = (0, 0)
 
       self.tabela = []
-      self.x = 1
+      self.x = 0
 
     def tela(self):
       if self.x == 0:
@@ -85,13 +85,13 @@ class BlockSprite(pygame.sprite.Sprite):
 
   def player_jump(self):
     if self.jumps > 0:
-      self.velocidadey = -6
+      self.velocidadey = -7
       self.jumps -= 1
       self.zjump = 6
 
-  def respawn(self):
-    if tabela.x == 1:
-      bloco.rect.topleft = (10, 850)
+  def respawn(self, y):
+    if tabela.x != 0:
+      bloco.rect.topleft = (10, y)
 
   def update(self):
     self.velocidadey += self.gravity
@@ -176,17 +176,17 @@ while running:
           tabela.x = 0
           chão = tabela.tela()
           todos_sprites = pygame.sprite.Group([chão])
-      elif event.key == pygame.K_a:
+      else:
         if tabela.x == 0:
-          tabela.x == 1
+          tabela.x = 1
           todos_sprites.remove(chão)
           chão = tabela.tela()
           todos_sprites.add(chão)
           todos_sprites.add(bloco)
-          bloco.respawn()
+          bloco.respawn(750)
       
-      elif event.key == pygame.K_c:                      # pulo
-        bloco.player_jump()
+        elif event.key == pygame.K_c:                      # pulo
+          bloco.player_jump()
 
   display.fill((146, 244, 255)) # Apaga o quadro atual preenchendo a tela com a cor azul claro
 
@@ -214,9 +214,11 @@ while running:
     todos_sprites.add(chão)
     bloco.rect.x = 0
 
+  if bloco.rect.top >= 980:
+    bloco.respawn(750)
+
 
   ### precisa pra funcionar/ coisas novas ###
-  print(tabela.x)
   bloco.update()
   todos_sprites.draw(display)
   scale = pygame.transform.scale(display, WINDOW_SIZE) # cola a minha tela "real" com o novo tamanho de tela
